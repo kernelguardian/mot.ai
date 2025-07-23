@@ -3,6 +3,7 @@ import { vehicles, motTests, predictions, type Vehicle, type InsertVehicle, type
 export interface IStorage {
   // Vehicle operations
   getVehicle(id: number): Promise<Vehicle | undefined>;
+  getVehicleByUuid(uuid: string): Promise<Vehicle | undefined>;
   getVehicleByRegistration(registration: string): Promise<Vehicle | undefined>;
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
   updateVehicle(id: number, vehicle: Partial<InsertVehicle>): Promise<Vehicle | undefined>;
@@ -15,6 +16,15 @@ export interface IStorage {
   getPredictionsByVehicleId(vehicleId: number): Promise<Prediction[]>;
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
   deletePredictionsByVehicleId(vehicleId: number): Promise<void>;
+}
+
+// Simple UUID generator
+function generateUuid(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 export class MemStorage implements IStorage {
@@ -38,6 +48,12 @@ export class MemStorage implements IStorage {
     return this.vehicles.get(id);
   }
 
+  async getVehicleByUuid(uuid: string): Promise<Vehicle | undefined> {
+    return Array.from(this.vehicles.values()).find(
+      vehicle => vehicle.uuid === uuid
+    );
+  }
+
   async getVehicleByRegistration(registration: string): Promise<Vehicle | undefined> {
     return Array.from(this.vehicles.values()).find(
       vehicle => vehicle.registration === registration.replace(/\s/g, '').toUpperCase()
@@ -46,9 +62,11 @@ export class MemStorage implements IStorage {
 
   async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
     const id = this.currentVehicleId++;
+    const uuid = generateUuid();
     const vehicle: Vehicle = {
       ...insertVehicle,
       id,
+      uuid,
       registration: insertVehicle.registration.replace(/\s/g, '').toUpperCase(),
       lastChecked: new Date(),
     };

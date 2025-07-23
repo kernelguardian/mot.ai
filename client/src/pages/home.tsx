@@ -5,15 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Car, Shield, Database, Brain, History, TriangleAlert, Gem, Wrench, Search, Lock } from "lucide-react";
-import { validateUKRegistration, formatRegistration } from "@/lib/mot-api";
+import { validateUKRegistration, formatRegistration, fetchVehicleDataByRegistration } from "@/lib/mot-api";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [registration, setRegistration] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!registration.trim()) {
@@ -34,8 +35,19 @@ export default function Home() {
       return;
     }
 
-    const cleanedReg = registration.replace(/\s/g, '').toUpperCase();
-    setLocation(`/vehicle/${cleanedReg}`);
+    setIsLoading(true);
+    try {
+      const cleanedReg = registration.replace(/\s/g, '').toUpperCase();
+      const data = await fetchVehicleDataByRegistration(cleanedReg);
+      setLocation(`/vehicle/${data.uuid}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch vehicle data. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
 
   const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,10 +132,20 @@ export default function Home() {
 
                 <Button 
                   type="submit" 
-                  className="w-full dvsa-blue hover:bg-blue-800 text-white font-bold py-4 px-8 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-dvsa-light-blue focus:ring-opacity-50"
+                  disabled={isLoading}
+                  className="w-full dvsa-blue hover:bg-blue-800 text-white font-bold py-4 px-8 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-dvsa-light-blue focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  <Search className="mr-2 w-5 h-5" />
-                  Check MOT Status
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 w-5 h-5" />
+                      Check MOT Status
+                    </>
+                  )}
                 </Button>
               </form>
 

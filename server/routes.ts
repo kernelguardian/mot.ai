@@ -137,8 +137,8 @@ function generatePredictions(motHistory: any[]): any[] {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Check MOT status for a vehicle
-  app.get("/api/vehicle/:registration", async (req, res) => {
+  // Check MOT status for a vehicle by registration (creates new record)
+  app.get("/api/vehicle/registration/:registration", async (req, res) => {
     try {
       const registration = ukRegistrationSchema.parse(req.params.registration);
       
@@ -198,6 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vehicle,
         motTests,
         predictions,
+        uuid: vehicle.uuid, // Return UUID for redirection
       });
 
     } catch (error) {
@@ -207,6 +208,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? "Invalid registration format" 
           : "Failed to fetch vehicle data" 
       });
+    }
+  });
+
+  // Get vehicle data by UUID (for unique links)
+  app.get("/api/vehicle/:uuid", async (req, res) => {
+    try {
+      const uuid = req.params.uuid;
+      
+      const vehicle = await storage.getVehicleByUuid(uuid);
+      if (!vehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+
+      // Get all related data
+      const motTests = await storage.getMotTestsByVehicleId(vehicle.id);
+      const predictions = await storage.getPredictionsByVehicleId(vehicle.id);
+
+      res.json({
+        vehicle,
+        motTests,
+        predictions,
+      });
+
+    } catch (error) {
+      console.error("Error fetching vehicle data by UUID:", error);
+      res.status(500).json({ message: "Failed to fetch vehicle data" });
     }
   });
 

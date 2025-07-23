@@ -41,8 +41,13 @@ export interface VehicleData {
   }>;
 }
 
-export async function fetchVehicleData(registration: string): Promise<VehicleData> {
-  const response = await apiRequest("GET", `/api/vehicle/${registration}`);
+export async function fetchVehicleDataByRegistration(registration: string): Promise<VehicleData & { uuid: string }> {
+  const response = await apiRequest("GET", `/api/vehicle/registration/${registration}`);
+  return await response.json();
+}
+
+export async function fetchVehicleDataByUuid(uuid: string): Promise<VehicleData> {
+  const response = await apiRequest("GET", `/api/vehicle/${uuid}`);
   return await response.json();
 }
 

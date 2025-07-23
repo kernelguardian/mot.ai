@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const vehicles = pgTable("vehicles", {
   id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
   registration: text("registration").notNull().unique(),
   make: text("make"),
   model: text("model"),
@@ -45,6 +46,7 @@ export const predictions = pgTable("predictions", {
 
 export const insertVehicleSchema = createInsertSchema(vehicles).omit({
   id: true,
+  uuid: true,
   lastChecked: true,
 });
 

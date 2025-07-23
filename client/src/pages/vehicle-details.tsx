@@ -5,23 +5,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { fetchVehicleData } from "@/lib/mot-api";
+import { fetchVehicleDataByUuid } from "@/lib/mot-api";
 import { analyzeMotHistory, getRiskLevelColor, getTestStatusColor, formatDate, calculateDaysUntilExpiry } from "@/lib/ai-predictions";
 
 interface VehicleDetailsProps {
   params: {
-    registration: string;
+    id: string;
   };
 }
 
 export default function VehicleDetails({ params }: VehicleDetailsProps) {
   const [, setLocation] = useLocation();
-  const { registration } = params;
+  const { id: uuid } = params;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/vehicle", registration],
-    queryFn: () => fetchVehicleData(registration),
-    enabled: !!registration,
+    queryKey: ["/api/vehicle", uuid],
+    queryFn: () => fetchVehicleDataByUuid(uuid),
+    enabled: !!uuid,
   });
 
   if (isLoading) {
@@ -43,7 +43,7 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
             <AlertTriangle className="w-12 h-12 text-gov-red mx-auto mb-4" />
             <h2 className="text-xl font-bold text-dvsa-blue mb-2">Vehicle Not Found</h2>
             <p className="text-gov-gray mb-4">
-              Unable to find MOT data for registration: {registration}
+              Unable to find vehicle data for this link. The vehicle may not exist or the link may be invalid.
             </p>
             <Button onClick={() => setLocation("/")} className="dvsa-blue">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -79,26 +79,53 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
 
       {/* Navigation Bar */}
       <div className="bg-white border-b border-gray-200 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/")}
+                className="text-dvsa-blue hover:text-blue-800 font-medium"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Search
+              </Button>
+              <span className="text-gov-gray">|</span>
+              <span className="font-plate text-xl text-dvsa-blue">{vehicle.registration}</span>
+            </div>
             <Button
-              variant="ghost"
+              variant="link"
               onClick={() => setLocation("/")}
-              className="text-dvsa-blue hover:text-blue-800 font-medium"
+              className="text-plate-yellow hover-yellow font-medium underline"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Search
+              Check Another Vehicle
             </Button>
-            <span className="text-gov-gray">|</span>
-            <span className="font-plate text-xl text-dvsa-blue">{vehicle.registration}</span>
           </div>
-          <Button
-            variant="link"
-            onClick={() => setLocation("/")}
-            className="text-plate-yellow hover-yellow font-medium underline"
-          >
-            Check Another Vehicle
-          </Button>
+          
+          {/* Mobile Layout */}
+          <div className="md:hidden space-y-3">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/")}
+                className="text-dvsa-blue hover:text-blue-800 font-medium"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Search
+              </Button>
+              <span className="font-plate text-lg text-dvsa-blue">{vehicle.registration}</span>
+            </div>
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => setLocation("/")}
+                className="text-plate-yellow hover-yellow font-medium underline text-sm"
+              >
+                Check Another Vehicle
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 

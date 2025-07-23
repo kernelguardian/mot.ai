@@ -35,7 +35,8 @@ Preferred communication style: Simple, everyday language.
 - **Predictions Table**: AI-generated predictions about potential failures and maintenance needs
 
 #### API Endpoints
-- `GET /api/vehicle/:registration` - Fetches complete vehicle data including MOT history and predictions
+- `GET /api/vehicle/registration/:registration` - Creates new vehicle record and returns UUID for unique access
+- `GET /api/vehicle/:uuid` - Fetches complete vehicle data including MOT history and predictions by UUID
 - Mock DVSA integration for demonstration (real DVSA API would require authentication)
 
 #### Frontend Pages
@@ -46,11 +47,11 @@ Preferred communication style: Simple, everyday language.
 #### Data Flow
 1. User enters UK vehicle registration on home page
 2. Client validates registration format using regex patterns
-3. API fetches vehicle data from database or creates new record
-4. Mock DVSA data is processed and stored
-5. AI predictions are generated based on MOT history patterns
-6. Complete vehicle profile is returned to client
-7. Vehicle details page displays comprehensive information
+3. API fetches vehicle data from database or creates new record with unique UUID
+4. Client receives UUID and redirects to unique vehicle page (/vehicle/{uuid})
+5. Mock DVSA data is processed and stored
+6. AI predictions are generated based on MOT history patterns
+7. Vehicle details page displays comprehensive information via UUID lookup
 
 ## Data Flow
 
