@@ -180,5 +180,17 @@
 /* Custom focus states for registration input */
 .registration-input:focus {
   border-color: var(--plate-yellow);
-  box-shadow: 0 0 0 4px hsl(51, 100%, 50%, 0.1);
+  background-color: var(--plate-yellow);
+  box-shadow: 0 0 0 4px hsl(51, 100%, 50%, 0.3);
+}
+
+/* Ensure yellow background always shows */
+.registration-input {
+  background-color: var(--plate-yellow) !important;
+}
+
+/* Custom placeholder styling for registration input */
+.registration-input::placeholder {
+  color: var(--dvsa-blue);
+  opacity: 0.7;
 }

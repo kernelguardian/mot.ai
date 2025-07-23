@@ -118,7 +118,7 @@ export default function Home() {
                       placeholder="e.g. AB12 CDE"
                       value={registration}
                       onChange={handleRegistrationChange}
-                      className="w-full px-4 py-4 text-2xl font-plate uppercase tracking-wider text-center border-4 border-plate-yellow focus:border-plate-yellow focus:ring-4 focus:ring-plate-yellow focus:ring-opacity-50 registration-input"
+                      className="w-full px-4 py-4 text-2xl font-plate uppercase tracking-wider text-center border-4 border-plate-yellow bg-plate-yellow text-dvsa-blue placeholder:text-dvsa-blue placeholder:opacity-70 focus:border-plate-yellow focus:ring-4 focus:ring-plate-yellow focus:ring-opacity-50 registration-input"
                       maxLength={8}
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
