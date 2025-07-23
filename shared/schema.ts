@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -65,6 +66,26 @@ export type InsertMotTest = z.infer<typeof insertMotTestSchema>;
 export type MotTest = typeof motTests.$inferSelect;
 export type InsertPrediction = z.infer<typeof insertPredictionSchema>;
 export type Prediction = typeof predictions.$inferSelect;
+
+// Relations
+export const vehiclesRelations = relations(vehicles, ({ many }) => ({
+  motTests: many(motTests),
+  predictions: many(predictions),
+}));
+
+export const motTestsRelations = relations(motTests, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [motTests.vehicleId],
+    references: [vehicles.id],
+  }),
+}));
+
+export const predictionsRelations = relations(predictions, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [predictions.vehicleId],
+    references: [vehicles.id],
+  }),
+}));
 
 // UK Registration validation schema
 export const ukRegistrationSchema = z.string()

@@ -23,7 +23,7 @@ Preferred communication style: Simple, everyday language.
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
 - **API Pattern**: RESTful API with JSON responses
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: PostgreSQL with Drizzle ORM (migrated from in-memory storage)
 - **Database Provider**: Neon Database (serverless PostgreSQL)
 - **Session Management**: Express sessions with PostgreSQL store
 

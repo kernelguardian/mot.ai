@@ -1,4 +1,6 @@
 import { vehicles, motTests, predictions, type Vehicle, type InsertVehicle, type MotTest, type InsertMotTest, type Prediction, type InsertPrediction } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Vehicle operations
@@ -27,107 +29,92 @@ function generateUuid(): string {
   });
 }
 
-export class MemStorage implements IStorage {
-  private vehicles: Map<number, Vehicle>;
-  private motTests: Map<number, MotTest>;
-  private predictions: Map<number, Prediction>;
-  private currentVehicleId: number;
-  private currentMotTestId: number;
-  private currentPredictionId: number;
 
-  constructor() {
-    this.vehicles = new Map();
-    this.motTests = new Map();
-    this.predictions = new Map();
-    this.currentVehicleId = 1;
-    this.currentMotTestId = 1;
-    this.currentPredictionId = 1;
-  }
 
+// rewrite MemStorage to DatabaseStorage
+export class DatabaseStorage implements IStorage {
   async getVehicle(id: number): Promise<Vehicle | undefined> {
-    return this.vehicles.get(id);
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, id));
+    return vehicle || undefined;
   }
 
   async getVehicleByUuid(uuid: string): Promise<Vehicle | undefined> {
-    return Array.from(this.vehicles.values()).find(
-      vehicle => vehicle.uuid === uuid
-    );
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.uuid, uuid));
+    return vehicle || undefined;
   }
 
   async getVehicleByRegistration(registration: string): Promise<Vehicle | undefined> {
-    return Array.from(this.vehicles.values()).find(
-      vehicle => vehicle.registration === registration.replace(/\s/g, '').toUpperCase()
-    );
+    const cleanedReg = registration.replace(/\s/g, '').toUpperCase();
+    const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.registration, cleanedReg));
+    return vehicle || undefined;
   }
 
   async createVehicle(insertVehicle: InsertVehicle): Promise<Vehicle> {
-    const id = this.currentVehicleId++;
     const uuid = generateUuid();
-    const vehicle: Vehicle = {
-      ...insertVehicle,
-      id,
-      uuid,
-      registration: insertVehicle.registration.replace(/\s/g, '').toUpperCase(),
-      lastChecked: new Date(),
-    };
-    this.vehicles.set(id, vehicle);
+    const [vehicle] = await db
+      .insert(vehicles)
+      .values({
+        ...insertVehicle,
+        uuid,
+        registration: insertVehicle.registration.replace(/\s/g, '').toUpperCase(),
+      })
+      .returning();
     return vehicle;
   }
 
   async updateVehicle(id: number, vehicleUpdate: Partial<InsertVehicle>): Promise<Vehicle | undefined> {
-    const existing = this.vehicles.get(id);
-    if (!existing) return undefined;
-
-    const updated: Vehicle = {
-      ...existing,
-      ...vehicleUpdate,
-      lastChecked: new Date(),
-    };
-    this.vehicles.set(id, updated);
-    return updated;
+    const [vehicle] = await db
+      .update(vehicles)
+      .set({
+        ...vehicleUpdate,
+        lastChecked: new Date(),
+      })
+      .where(eq(vehicles.id, id))
+      .returning();
+    return vehicle || undefined;
   }
 
   async getMotTestsByVehicleId(vehicleId: number): Promise<MotTest[]> {
-    return Array.from(this.motTests.values())
-      .filter(test => test.vehicleId === vehicleId)
-      .sort((a, b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime());
+    const tests = await db
+      .select()
+      .from(motTests)
+      .where(eq(motTests.vehicleId, vehicleId))
+      .orderBy(motTests.testDate);
+    return tests.sort((a, b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime());
   }
 
   async createMotTest(insertMotTest: InsertMotTest): Promise<MotTest> {
-    const id = this.currentMotTestId++;
-    const motTest: MotTest = { ...insertMotTest, id };
-    this.motTests.set(id, motTest);
+    const [motTest] = await db
+      .insert(motTests)
+      .values(insertMotTest)
+      .returning();
     return motTest;
   }
 
   async getPredictionsByVehicleId(vehicleId: number): Promise<Prediction[]> {
-    return Array.from(this.predictions.values())
-      .filter(prediction => prediction.vehicleId === vehicleId)
-      .sort((a, b) => {
-        const riskOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        return (riskOrder[b.riskLevel as keyof typeof riskOrder] || 0) - 
-               (riskOrder[a.riskLevel as keyof typeof riskOrder] || 0);
-      });
+    const preds = await db
+      .select()
+      .from(predictions)
+      .where(eq(predictions.vehicleId, vehicleId));
+    
+    return preds.sort((a, b) => {
+      const riskOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+      return (riskOrder[b.riskLevel as keyof typeof riskOrder] || 0) - 
+             (riskOrder[a.riskLevel as keyof typeof riskOrder] || 0);
+    });
   }
 
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
-    const id = this.currentPredictionId++;
-    const prediction: Prediction = {
-      ...insertPrediction,
-      id,
-      createdAt: new Date(),
-    };
-    this.predictions.set(id, prediction);
+    const [prediction] = await db
+      .insert(predictions)
+      .values(insertPrediction)
+      .returning();
     return prediction;
   }
 
   async deletePredictionsByVehicleId(vehicleId: number): Promise<void> {
-    const toDelete = Array.from(this.predictions.entries())
-      .filter(([_, prediction]) => prediction.vehicleId === vehicleId)
-      .map(([id]) => id);
-    
-    toDelete.forEach(id => this.predictions.delete(id));
+    await db.delete(predictions).where(eq(predictions.vehicleId, vehicleId));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
