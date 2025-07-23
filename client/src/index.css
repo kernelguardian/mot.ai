@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* MOT.AI Custom Colors */
+  --dvsa-blue: hsl(213, 100%, 20%);
+  --dvsa-light-blue: hsl(213, 100%, 40%);
+  --plate-yellow: hsl(51, 100%, 50%);
+  --gov-green: hsl(163, 100%, 22%);
+  --gov-red: hsl(8, 79%, 47%);
+  --gov-orange: hsl(25, 87%, 58%);
+  --gov-gray: hsl(200, 10%, 34%);
+  --gov-bg: hsl(41, 33%, 94%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* MOT.AI Custom Styles */
+.dvsa-blue {
+  background-color: var(--dvsa-blue);
+}
+
+.text-dvsa-blue {
+  color: var(--dvsa-blue);
+}
+
+.bg-dvsa-light-blue {
+  background-color: var(--dvsa-light-blue);
+}
+
+.text-dvsa-light-blue {
+  color: var(--dvsa-light-blue);
+}
+
+.bg-plate-yellow {
+  background-color: var(--plate-yellow);
+}
+
+.text-plate-yellow {
+  color: var(--plate-yellow);
+}
+
+.bg-gov-green {
+  background-color: var(--gov-green);
+}
+
+.text-gov-green {
+  color: var(--gov-green);
+}
+
+.bg-gov-red {
+  background-color: var(--gov-red);
+}
+
+.text-gov-red {
+  color: var(--gov-red);
+}
+
+.bg-gov-orange {
+  background-color: var(--gov-orange);
+}
+
+.text-gov-orange {
+  color: var(--gov-orange);
+}
+
+.bg-gov-gray {
+  background-color: var(--gov-gray);
+}
+
+.text-gov-gray {
+  color: var(--gov-gray);
+}
+
+.bg-gov-bg {
+  background-color: var(--gov-bg);
+}
+
+/* UK Number Plate Font */
+.font-plate {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}
+
+/* Gradient backgrounds */
+.gradient-dvsa {
+  background: linear-gradient(135deg, var(--dvsa-blue) 0%, var(--dvsa-light-blue) 100%);
+}
+
+/* Custom hover states for yellow links */
+.hover-yellow {
+  transition: color 0.2s ease;
+}
+
+.hover-yellow:hover {
+  color: hsl(51, 100%, 40%);
+}
+
+/* Custom animations */
+@keyframes pulse-yellow {
+  0%, 100% {
+    background-color: var(--plate-yellow);
+  }
+  50% {
+    background-color: hsl(51, 100%, 60%);
+  }
+}
+
+.animate-pulse-yellow {
+  animation: pulse-yellow 2s infinite;
+}
+
+/* Risk level colors */
+.risk-high {
+  background-color: var(--gov-red);
+}
+
+.risk-medium {
+  background-color: var(--gov-orange);
+}
+
+.risk-low {
+  background-color: var(--gov-green);
+}
+
+/* Custom focus states for registration input */
+.registration-input:focus {
+  border-color: var(--plate-yellow);
+  box-shadow: 0 0 0 4px hsl(51, 100%, 50%, 0.1);
+}
