@@ -103,4 +103,10 @@ The application follows a typical client-server data flow:
 - `npm run start` - Runs production server
 - `npm run db:push` - Applies database schema changes
 
+## Documentation
+- **README.md** - Comprehensive setup guide for local development and GitHub deployment
+- **LICENSE** - MIT License for open source distribution
+- **.env.example** - Template for environment variable configuration
+- **.gitignore** - Proper Git ignore rules for Node.js and database files
+
 The application is designed for deployment on cloud platforms like Replit, Vercel, or traditional VPS hosting, with PostgreSQL database connectivity and environment-based configuration management.
