@@ -301,8 +301,7 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                 {motTests.map((test, index) => (
                   <div key={test.id} className={`relative pl-8 pb-6 ${index < motTests.length - 1 ? `border-l-2 ${test.testResult === 'PASS' ? 'border-gov-green' : 'border-gov-red'}` : ''}`}>
                     <div className="absolute -left-3 top-0">
-                      <div className={`${getTestStatusColor(test.testResult)} text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs`}>
-                        {test.testResult === 'PASS' ? '✓' : '✗'}
+                      <div className={`${getTestStatusColor(test.testResult)} w-6 h-6 rounded-full`}>
                       </div>
                     </div>
                     <Card className={`${test.testResult === 'PASS' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
@@ -316,7 +315,7 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                               Test #: {test.testNumber}
                             </p>
                           </div>
-                          <Badge className={`${getTestStatusColor(test.testResult)} text-white`}>
+                          <Badge className={`${test.testResult === 'PASS' ? 'bg-green-600 hover:bg-green-700' : getTestStatusColor(test.testResult)} text-white`}>
                             {test.testResult}
                           </Badge>
                         </div>
