@@ -16,13 +16,16 @@
 4. Vercel will auto-detect it's a Node.js project
 
 ### 2. Configure Build Settings
-Vercel should automatically detect the configuration from `vercel.json`, but verify:
-- **Framework Preset**: Other
-- **Build Command**: `npm install && npm run build`
-- **Output Directory**: `dist/public`
-- **Install Command**: `npm ci`
+Vercel will automatically detect the configuration from `vercel.json`:
+- **Framework Preset**: Other (auto-detected)
+- **Build Command**: `npm run build` (from vercel.json)
+- **Output Directory**: `dist/public` (from vercel.json)
+- **Install Command**: `npm ci` (auto-detected)
 
-**Important**: The project now uses a simplified Vercel configuration that automatically handles both frontend and backend deployment.
+**Important**: The project uses a simplified Vercel configuration:
+- Frontend assets are served from `dist/public`
+- API routes are handled by the `api/index.js` serverless function
+- The Express app is automatically initialized for each request
 
 ### 3. Set Environment Variables
 In your Vercel project dashboard, go to Settings → Environment Variables and add:

@@ -112,9 +112,10 @@ The application follows a typical client-server data flow:
 ### Deployment Platforms
 
 #### Vercel Deployment (Production Ready)
-- **Configuration**: `vercel.json` with serverless function setup
-- **Build**: Automatic deployment from GitHub with optimized builds
-- **Database**: Compatible with Neon, Supabase, and other PostgreSQL providers
+- **Configuration**: Simplified `vercel.json` with automatic detection and serverless API routing
+- **Build**: Automatic deployment from GitHub with optimized frontend/backend builds
+- **Database**: Auto-detects Neon (cloud) vs local PostgreSQL connections
+- **API Routes**: Express app served via `api/index.js` serverless function
 - **Environment**: Full environment variable support for DVSA API credentials
 - **Performance**: CDN-optimized static assets with serverless backend functions
 - **Guide**: Complete setup instructions in `scripts/VERCEL-DEPLOYMENT.md`
