@@ -107,7 +107,22 @@ The application follows a typical client-server data flow:
 ### Environment Configuration
 - Database URL configuration through environment variables
 - Support for both development and production environments
-- Replit-specific optimizations for cloud deployment
+- Multi-platform deployment support (Replit, Vercel, local)
+
+### Deployment Platforms
+
+#### Vercel Deployment (Production Ready)
+- **Configuration**: `vercel.json` with serverless function setup
+- **Build**: Automatic deployment from GitHub with optimized builds
+- **Database**: Compatible with Neon, Supabase, and other PostgreSQL providers
+- **Environment**: Full environment variable support for DVSA API credentials
+- **Performance**: CDN-optimized static assets with serverless backend functions
+- **Guide**: Complete setup instructions in `scripts/VERCEL-DEPLOYMENT.md`
+
+#### Replit Deployment (Development/Testing)
+- **Configuration**: Replit-specific optimizations for cloud deployment
+- **Database**: Integrated PostgreSQL with automatic provisioning
+- **Environment**: Built-in secrets management
 
 ### Development Workflow
 - `npm run dev` - Starts development server with hot reloading
