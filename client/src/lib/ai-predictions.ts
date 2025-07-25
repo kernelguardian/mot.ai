@@ -55,7 +55,7 @@ export function getTestStatusColor(result: string): string {
   }
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, includeTime: boolean = false): string {
   if (!dateString) return 'N/A';
   
   try {
@@ -80,11 +80,24 @@ export function formatDate(dateString: string): string {
       throw new Error('Invalid date');
     }
     
-    return date.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    if (includeTime) {
+      // Format: "15-July-2024 14:30 PM"
+      const day = date.getDate();
+      const month = date.toLocaleDateString('en-GB', { month: 'long' });
+      const year = date.getFullYear();
+      const time = date.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+      return `${day}-${month}-${year} ${time}`;
+    } else {
+      // Format: "15-July-2024"
+      const day = date.getDate();
+      const month = date.toLocaleDateString('en-GB', { month: 'long' });
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
   } catch {
     // Return original string if parsing fails
     return dateString || 'N/A';

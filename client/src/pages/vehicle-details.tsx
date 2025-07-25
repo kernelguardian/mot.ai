@@ -167,12 +167,12 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                         </p>
                       </div>
                       <div className="text-right">
-                        <Badge className={`${vehicle.motStatus === 'PASS' ? 'bg-gov-green' : 'bg-gov-red'} text-white`}>
-                          {vehicle.motStatus === 'PASS' ? 
+                        <Badge className={`${daysUntilExpiry && daysUntilExpiry >= 0 ? 'bg-gov-green' : 'bg-gov-red'} text-white`}>
+                          {daysUntilExpiry && daysUntilExpiry >= 0 ? 
                             <CheckCircle className="w-4 h-4 mr-1" /> : 
                             <X className="w-4 h-4 mr-1 font-bold" />
                           }
-                          {vehicle.motStatus === 'PASS' ? 'VALID MOT' : 'INVALID MOT'}
+                          {daysUntilExpiry && daysUntilExpiry >= 0 ? 'VALID MOT' : 'INVALID MOT'}
                         </Badge>
                       </div>
                     </div>
@@ -181,7 +181,7 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                       <div>
                         <label className="text-sm font-medium text-gov-gray">MOT Expiry Date</label>
                         <p className="text-lg font-semibold text-dvsa-blue">
-                          {vehicle.motExpiryDate ? formatDate(vehicle.motExpiryDate) : 'N/A'}
+                          {vehicle.motExpiryDate ? formatDate(vehicle.motExpiryDate, false) : 'N/A'}
                         </p>
                       </div>
                       <div>
@@ -301,21 +301,20 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                 {motTests.map((test, index) => (
                   <div key={test.id} className={`relative pl-8 pb-6 ${index < motTests.length - 1 ? `border-l-2 ${test.testResult === 'PASS' ? 'border-gov-green' : 'border-gov-red'}` : ''}`}>
                     <div className="absolute -left-3 top-0">
-                      <div className={`${getTestStatusColor(test.testResult)} text-white w-6 h-6 rounded-full flex items-center justify-center`}>
-                        {test.testResult === 'PASS' ? 
-                          <CheckCircle className="w-3 h-3" /> : 
-                          <X className="w-3 h-3 font-bold" />
-                        }
+                      <div className={`${getTestStatusColor(test.testResult)} text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs`}>
+                        {test.testResult === 'PASS' ? '✓' : '✗'}
                       </div>
                     </div>
-                    <Card className={`${test.testResult === 'PASS' ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <Card className={`${test.testResult === 'PASS' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3 className={`font-semibold ${test.testResult === 'PASS' ? 'text-gov-green' : 'text-gov-red'}`}>
-                              {formatDate(test.testDate)}
+                              {formatDate(test.testDate, false)}
                             </h3>
-                            <p className="text-sm text-gov-gray">Test #: {test.testNumber}</p>
+                            <p className="text-sm text-gov-gray">
+                              Test #: {test.testNumber}
+                            </p>
                           </div>
                           <Badge className={`${getTestStatusColor(test.testResult)} text-white`}>
                             {test.testResult}
