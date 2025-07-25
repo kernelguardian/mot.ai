@@ -59,7 +59,7 @@ export function formatDate(dateString: string, includeTime: boolean = false): st
   if (!dateString) return 'N/A';
   
   try {
-    // Handle DVSA format: "2024.03.15" or ISO format
+    // Handle multiple date formats
     let date: Date;
     
     if (dateString.includes('.')) {
@@ -70,8 +70,11 @@ export function formatDate(dateString: string, includeTime: boolean = false): st
       } else {
         throw new Error('Invalid date format');
       }
+    } else if (dateString.includes('T') || dateString.includes('Z')) {
+      // ISO format: "2025-02-13T11:31:02.000Z"
+      date = new Date(dateString);
     } else {
-      // ISO format or other
+      // Other formats
       date = new Date(dateString);
     }
     
