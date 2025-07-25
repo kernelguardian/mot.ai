@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, Car, CheckCircle, Clock, AlertTriangle, Brain, History, ChevronDown, Info, X, Eye } from "lucide-react";
+import { ArrowLeft, Car, CheckCircle, Clock, AlertTriangle, Brain, History, ChevronDown, Info, X, Eye, ChevronUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ interface VehicleDetailsProps {
 export default function VehicleDetails({ params }: VehicleDetailsProps) {
   const [, setLocation] = useLocation();
   const { id: uuid } = params;
+  const [expandedAdvisories, setExpandedAdvisories] = useState<Set<number>>(new Set());
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/vehicle", uuid],
@@ -60,6 +62,16 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
   const { vehicle, motTests, predictions } = data;
   const stats = analyzeMotHistory(motTests);
   const daysUntilExpiry = calculateDaysUntilExpiry(vehicle.motExpiryDate);
+
+  const toggleAdvisories = (testId: number) => {
+    const newExpanded = new Set(expandedAdvisories);
+    if (newExpanded.has(testId)) {
+      newExpanded.delete(testId);
+    } else {
+      newExpanded.add(testId);
+    }
+    setExpandedAdvisories(newExpanded);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -318,6 +330,42 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                                 <li key={idx}>• {failure.text || failure}</li>
                               ))}
                             </ul>
+                          </div>
+                        )}
+
+                        {test.advisories && test.advisories.length > 0 && (
+                          <div className="mt-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium text-gov-orange">
+                                Advisories ({test.advisories.length})
+                              </h4>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleAdvisories(test.id)}
+                                className="text-gov-orange hover:text-orange-800 p-1"
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                {expandedAdvisories.has(test.id) ? 'Hide' : 'Show'}
+                                {expandedAdvisories.has(test.id) ? 
+                                  <ChevronUp className="w-4 h-4 ml-1" /> : 
+                                  <ChevronDown className="w-4 h-4 ml-1" />
+                                }
+                              </Button>
+                            </div>
+                            
+                            {expandedAdvisories.has(test.id) && (
+                              <div className="mt-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                <ul className="text-sm text-gov-gray space-y-1">
+                                  {test.advisories.map((advisory: any, idx: number) => (
+                                    <li key={idx} className="flex items-start">
+                                      <span className="text-gov-orange mr-2">•</span>
+                                      <span>{advisory.text || advisory}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         )}
                         
