@@ -59,32 +59,31 @@ export function formatDate(dateString: string, includeTime: boolean = false): st
   if (!dateString) return 'N/A';
   
   try {
-    // Handle multiple date formats
-    let date: Date;
-    
-    if (dateString.includes('.')) {
-      // DVSA format: "2024.03.15"
-      const parts = dateString.split('.');
-      if (parts.length === 3) {
-        date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      } else {
-        throw new Error('Invalid date format');
-      }
-    } else if (dateString.includes('T') || dateString.includes('Z')) {
-      // ISO format: "2025-02-13T11:31:02.000Z"
-      date = new Date(dateString);
-    } else {
-      // Other formats
-      date = new Date(dateString);
-    }
+    // Parse the date - handle different formats
+    const date = new Date(dateString);
     
     // Check if date is valid
     if (isNaN(date.getTime())) {
-      throw new Error('Invalid date');
+      // Try DVSA format if standard parsing fails
+      if (dateString.includes('.')) {
+        const parts = dateString.split('.');
+        if (parts.length === 3) {
+          const parsedDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          if (!isNaN(parsedDate.getTime())) {
+            date.setTime(parsedDate.getTime());
+          } else {
+            throw new Error('Invalid date');
+          }
+        } else {
+          throw new Error('Invalid date format');
+        }
+      } else {
+        throw new Error('Invalid date');
+      }
     }
     
     if (includeTime) {
-      // Format: "15-July-2024 14:30 PM"
+      // Format: "15-July-2024 2:30 PM"
       const day = date.getDate();
       const month = date.toLocaleDateString('en-GB', { month: 'long' });
       const year = date.getFullYear();
