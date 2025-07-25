@@ -59,16 +59,22 @@ async function createApp() {
   return { app, server };
 }
 
-// For Vercel serverless functions
-if (process.env.VERCEL) {
-  createApp().then(({ app }) => {
-    module.exports = app;
-  });
-} else {
-  // For local development and other deployments
-  (async () => {
-    const { server } = await createApp();
-    
+// Initialize the app for Vercel
+let appInstance: any = null;
+
+async function initializeApp() {
+  if (!appInstance) {
+    const { app } = await createApp();
+    appInstance = app;
+  }
+  return appInstance;
+}
+
+// Start the server for local development
+(async () => {
+  const { server } = await createApp();
+  
+  if (!process.env.VERCEL) {
     // ALWAYS serve the app on the port specified in the environment variable PORT
     // Other ports are firewalled. Default to 5000 if not specified.
     // this serves both the API and the client.
@@ -81,5 +87,8 @@ if (process.env.VERCEL) {
     }, () => {
       log(`serving on port ${port}`);
     });
-  })();
-}
+  }
+})();
+
+// Export for Vercel
+export { initializeApp };

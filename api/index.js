@@ -1,10 +1,16 @@
-// Vercel serverless function entry point for API routes
-const path = require('path');
+// Vercel API route handler
+import { initializeApp } from '../dist/index.js';
 
-// Set NODE_ENV to production for Vercel
-process.env.NODE_ENV = 'production';
+let app = null;
 
-// Import the built Express app
-const appPath = path.resolve(__dirname, '../dist/index.js');
-
-module.exports = require(appPath).default || require(appPath);
+export default async function handler(req, res) {
+  try {
+    if (!app) {
+      app = await initializeApp();
+    }
+    return app(req, res);
+  } catch (error) {
+    console.error('Vercel handler error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
