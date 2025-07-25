@@ -6,6 +6,17 @@ export interface PredictionAnalysis {
   riskScore: number;
 }
 
+export interface NextMotIssue {
+  id: string;
+  component: string;
+  issue: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  probability: number;
+  estimatedCost: string;
+  priority: number;
+  recommendation: string;
+}
+
 export function analyzeMotHistory(motTests: any[]): PredictionAnalysis {
   const totalTests = motTests.length;
   const failures = motTests.filter(test => test.testResult === "FAIL").length;
@@ -118,4 +129,79 @@ export function calculateDaysUntilExpiry(expiryDate: string | null): number | nu
   } catch {
     return null;
   }
+}
+
+// Dummy data for next MOT predictions
+export function getNextMotPredictions(vehicleAge: number, fuelType: string): NextMotIssue[] {
+  const baseIssues: NextMotIssue[] = [
+    {
+      id: 'brakes-1',
+      component: 'Brakes',
+      issue: 'Brake disc wear approaching limits',
+      riskLevel: 'MEDIUM',
+      probability: 68,
+      estimatedCost: '£120-180',
+      priority: 1,
+      recommendation: 'Inspect brake discs and pads before next MOT'
+    },
+    {
+      id: 'tyres-1',
+      component: 'Tyres',
+      issue: 'Front tyre tread depth declining',
+      riskLevel: 'LOW',
+      probability: 42,
+      estimatedCost: '£80-120',
+      priority: 3,
+      recommendation: 'Monitor tread depth, consider replacement if below 2.5mm'
+    },
+    {
+      id: 'lights-1',
+      component: 'Lights',
+      issue: 'Headlight alignment may require adjustment',
+      riskLevel: 'LOW',
+      probability: 35,
+      estimatedCost: '£25-45',
+      priority: 4,
+      recommendation: 'Check headlight alignment at service'
+    },
+    {
+      id: 'suspension-1',
+      component: 'Suspension',
+      issue: 'Shock absorber performance degradation',
+      riskLevel: 'MEDIUM',
+      probability: 55,
+      estimatedCost: '£150-250',
+      priority: 2,
+      recommendation: 'Have suspension system inspected by qualified mechanic'
+    }
+  ];
+
+  // Adjust predictions based on vehicle age and fuel type
+  if (vehicleAge > 8) {
+    baseIssues.push({
+      id: 'exhaust-1',
+      component: 'Exhaust',
+      issue: 'Exhaust system corrosion potential',
+      riskLevel: 'HIGH',
+      probability: 78,
+      estimatedCost: '£200-350',
+      priority: 1,
+      recommendation: 'Annual exhaust system inspection recommended'
+    });
+  }
+
+  if (fuelType === 'Diesel') {
+    baseIssues.push({
+      id: 'emissions-1',
+      component: 'Emissions',
+      issue: 'DPF filter efficiency declining',
+      riskLevel: 'MEDIUM',
+      probability: 62,
+      estimatedCost: '£300-500',
+      priority: 2,
+      recommendation: 'Regular long drives to maintain DPF health'
+    });
+  }
+
+  return baseIssues.sort((a, b) => a.priority - b.priority);
 }

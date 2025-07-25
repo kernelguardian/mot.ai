@@ -26,6 +26,8 @@ import {
   getTestStatusColor,
   formatDate,
   calculateDaysUntilExpiry,
+  getNextMotPredictions,
+  type NextMotIssue,
 } from "@/lib/ai-predictions";
 
 interface VehicleDetailsProps {
@@ -86,6 +88,8 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
   const { vehicle, motTests, predictions } = data;
   const stats = analyzeMotHistory(motTests);
   const daysUntilExpiry = calculateDaysUntilExpiry(vehicle.motExpiryDate);
+  const vehicleAge = vehicle.year ? new Date().getFullYear() - parseInt(vehicle.year) : 5;
+  const nextMotIssues = getNextMotPredictions(vehicleAge, vehicle.fuelType || 'Petrol');
 
   const toggleAdvisories = (testId: number) => {
     const newExpanded = new Set(expandedAdvisories);
@@ -349,6 +353,69 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                   </Card>
                 ))}
               </div>
+
+              {/* Next MOT Predictions Card */}
+              <div className="mt-8">
+                <Card className="border-l-4 border-plate-yellow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-dvsa-blue flex items-center">
+                        <AlertTriangle className="w-5 h-5 mr-2 text-plate-yellow" />
+                        Predicted MOT Issues by Next MOT
+                      </h3>
+                      <Badge variant="outline" className="text-dvsa-blue border-dvsa-blue">
+                        Next MOT Due: {vehicle.motExpiryDate ? formatDate(vehicle.motExpiryDate, false) : 'Unknown'}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-4">
+                      {nextMotIssues.map((issue) => (
+                        <Card key={issue.id} className="border hover:shadow-sm transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-medium text-dvsa-blue">{issue.component}</h4>
+                                  <div className="flex items-center space-x-2">
+                                    <Badge className={`${getRiskLevelColor(issue.riskLevel)} text-white text-xs`}>
+                                      {issue.riskLevel}
+                                    </Badge>
+                                    <span className="text-sm font-medium text-gov-gray">
+                                      {issue.probability}%
+                                    </span>
+                                  </div>
+                                </div>
+                                <p className="text-sm text-gov-gray mb-2">{issue.issue}</p>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-medium text-dvsa-blue">
+                                    Est. Cost: {issue.estimatedCost}
+                                  </span>
+                                  <span className="text-xs text-gov-gray">
+                                    Priority: {issue.priority}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-blue-50 rounded-lg border-l-3 border-dvsa-light-blue">
+                              <p className="text-sm text-dvsa-blue">
+                                <strong>Recommendation:</strong> {issue.recommendation}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 p-3 bg-plate-yellow bg-opacity-10 rounded-lg">
+                      <p className="text-xs text-gov-gray">
+                        <Info className="inline w-3 h-3 mr-1" />
+                        Predictions based on vehicle age ({vehicleAge.toString()} years), fuel type ({vehicle.fuelType || 'Unknown'}), 
+                        and historical MOT patterns. Recommendations are advisory only.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -377,13 +444,13 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                       ></div>
                     </div>
                     <Card
-                      className={`${test.testResult === "PASSED" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
+                      className={`${test.testResult === "PASS" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}
                     >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3
-                              className={`font-semibold ${test.testResult === "PASSED" ? "text-gov-green" : "text-gov-red"}`}
+                              className={`font-semibold ${test.testResult === "PASS" ? "text-gov-green" : "text-gov-red"}`}
                             >
                               {formatDate(test.testDate, false)}
                             </h3>
@@ -392,13 +459,13 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                             </p>
                           </div>
                           <Badge
-                            className={`${test.testResult === "PASSED" ? "bg-green-600 hover:bg-green-700" : getTestStatusColor(test.testResult)} text-white`}
+                            className={`${test.testResult === "PASS" ? "bg-green-600 hover:bg-green-700" : getTestStatusColor(test.testResult)} text-white`}
                           >
                             {test.testResult}
                           </Badge>
                         </div>
 
-                        {test.testResult === "FAILED" &&
+                        {test.testResult === "FAIL" &&
                           test.failures &&
                           test.failures.length > 0 && (
                             <div className="mt-3">
