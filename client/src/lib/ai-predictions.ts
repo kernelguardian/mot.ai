@@ -56,16 +56,38 @@ export function getTestStatusColor(result: string): string {
 }
 
 export function formatDate(dateString: string): string {
+  if (!dateString) return 'N/A';
+  
   try {
-    // Handle DVSA format: "2024.03.15"
-    const date = new Date(dateString.replace(/\./g, '-'));
+    // Handle DVSA format: "2024.03.15" or ISO format
+    let date: Date;
+    
+    if (dateString.includes('.')) {
+      // DVSA format: "2024.03.15"
+      const parts = dateString.split('.');
+      if (parts.length === 3) {
+        date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      } else {
+        throw new Error('Invalid date format');
+      }
+    } else {
+      // ISO format or other
+      date = new Date(dateString);
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date');
+    }
+    
     return date.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     });
   } catch {
-    return dateString;
+    // Return original string if parsing fails
+    return dateString || 'N/A';
   }
 }
 

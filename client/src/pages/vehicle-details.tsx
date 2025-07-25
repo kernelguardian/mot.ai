@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft, Car, CheckCircle, Clock, AlertTriangle, Brain, History, ChevronDown, Info } from "lucide-react";
+import { ArrowLeft, Car, CheckCircle, Clock, AlertTriangle, Brain, History, ChevronDown, Info, X, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -156,7 +156,10 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                       </div>
                       <div className="text-right">
                         <Badge className={`${vehicle.motStatus === 'PASS' ? 'bg-gov-green' : 'bg-gov-red'} text-white`}>
-                          <CheckCircle className="w-4 h-4 mr-1" />
+                          {vehicle.motStatus === 'PASS' ? 
+                            <CheckCircle className="w-4 h-4 mr-1" /> : 
+                            <X className="w-4 h-4 mr-1 font-bold" />
+                          }
                           {vehicle.motStatus === 'PASS' ? 'VALID MOT' : 'INVALID MOT'}
                         </Badge>
                       </div>
@@ -289,7 +292,7 @@ export default function VehicleDetails({ params }: VehicleDetailsProps) {
                       <div className={`${getTestStatusColor(test.testResult)} text-white w-6 h-6 rounded-full flex items-center justify-center`}>
                         {test.testResult === 'PASS' ? 
                           <CheckCircle className="w-3 h-3" /> : 
-                          <AlertTriangle className="w-3 h-3" />
+                          <X className="w-3 h-3 font-bold" />
                         }
                       </div>
                     </div>
