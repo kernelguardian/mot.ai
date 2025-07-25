@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ukRegistrationSchema } from "@shared/schema";
 import { z } from "zod";
+import { fetchDVSAMotData, isDVSAConfigured } from "./dvsa-api";
 
 // Mock DVSA API data for demonstration
 const mockDVSAResponse = (registration: string) => ({
@@ -208,6 +209,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? "Invalid registration format" 
           : "Failed to fetch vehicle data" 
       });
+    }
+  });
+
+  // Direct DVSA API endpoint for authenticated API calls
+  app.get("/api/dvsa/vehicle/:registration", async (req, res) => {
+    try {
+      const registration = ukRegistrationSchema.parse(req.params.registration);
+      
+      // Check if DVSA API is configured
+      if (!isDVSAConfigured()) {
+        // Fallback to mock data if DVSA API is not configured
+        console.log("DVSA API not configured, using mock data for registration:", registration);
+        const mockData = mockDVSAResponse(registration);
+        return res.json(mockData);
+      }
+
+      // Fetch data from official DVSA API
+      console.log("Fetching data from official DVSA API for registration:", registration);
+      const dvsaData = await fetchDVSAMotData(registration);
+      
+      res.json(dvsaData);
+
+    } catch (error) {
+      console.error("DVSA API Error:", error);
+      
+      // Provide specific error messages
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch vehicle data";
+      
+      if (errorMessage.includes("not found") || errorMessage.includes("404")) {
+        return res.status(404).json({ message: `Vehicle not found: ${req.params.registration.toUpperCase()}` });
+      } else if (errorMessage.includes("authentication") || errorMessage.includes("401")) {
+        return res.status(401).json({ message: "API authentication failed. Please check DVSA credentials." });
+      } else if (errorMessage.includes("access denied") || errorMessage.includes("403")) {
+        return res.status(403).json({ message: "API access denied. Please check DVSA API key permissions." });
+      } else if (errorMessage.includes("rate limit") || errorMessage.includes("429")) {
+        return res.status(429).json({ message: "API rate limit exceeded. Please try again later." });
+      } else if (errorMessage.includes("credentials not configured")) {
+        return res.status(503).json({ message: "DVSA API not configured. Please provide API credentials." });
+      } else {
+        return res.status(500).json({ message: errorMessage });
+      }
     }
   });
 

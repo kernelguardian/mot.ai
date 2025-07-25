@@ -243,6 +243,14 @@ export default function Home() {
               <p className="text-blue-100 text-sm">
                 Intelligent MOT analysis powered by machine learning and official DVSA data.
               </p>
+              <div className="mt-4">
+                <a 
+                  href="/api-test" 
+                  className="text-plate-yellow hover:text-yellow-300 text-sm underline font-medium"
+                >
+                  Test DVSA API Integration →
+                </a>
+              </div>
             </div>
             
             <div>

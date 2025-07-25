@@ -55,7 +55,13 @@ npm install
 
 ### 3. Environment Configuration
 
-Create a `.env` file in the root directory:
+Create a `.env` file from the provided template:
+
+```bash
+cp .env.example .env
+```
+
+Configure your environment variables in `.env`:
 
 ```env
 # Database Configuration
@@ -66,11 +72,29 @@ PGDATABASE="motai"
 PGUSER="your_username"
 PGPASSWORD="your_password"
 
+# Official DVSA MOT API Credentials (Optional)
+DVSA_CLIENT_ID="your_client_id_here"
+DVSA_CLIENT_SECRET="your_client_secret_here"
+DVSA_TOKEN_URL="your_full_token_url_here"
+DVSA_API_KEY="your_api_key_here"
+
 # Development
 NODE_ENV="development"
 ```
 
-**Note:** Replace the database credentials with your actual PostgreSQL setup.
+#### DVSA MOT API Integration
+
+For authentic UK MOT data, register for the official DVSA MOT History API:
+
+1. **Register for API Access**: Visit https://documentation.history.mot.api.gov.uk/
+2. **Complete the registration process** - You'll receive credentials via email
+3. **Add all four credentials** to your `.env` file as shown above
+
+**Important Notes:**
+- If DVSA credentials are not configured, the app uses realistic mock data
+- Client Secret expires every 2 years (you'll receive email reminders)
+- API Key is revoked if unused for 90 days
+- All features work identically with both real and mock data
 
 ### 4. Database Setup
 

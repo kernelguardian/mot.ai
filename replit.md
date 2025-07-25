@@ -80,10 +80,14 @@ The application follows a typical client-server data flow:
 - **Linting**: ESBuild for fast bundling and transpilation
 - **Development**: TSX for TypeScript execution in development
 
-### Mock Integrations
-- Currently uses mock DVSA API data for demonstration
-- Real implementation would integrate with official DVSA MOT History API
-- Mock data includes realistic MOT test results, failure patterns, and vehicle information
+### DVSA API Integration
+- **Official DVSA MOT History API Integration**: Full implementation with OAuth2 authentication
+- **Automatic Fallback**: Uses realistic mock data when API credentials are not configured
+- **Authentication**: Microsoft Entra ID OAuth2 with client credentials flow
+- **Token Caching**: Automatic token management with 50-minute cache duration
+- **Error Handling**: Comprehensive error handling with specific user-friendly messages
+- **Rate Limiting**: Built-in support for API rate limits and quotas
+- **API Test Console**: Developer interface at `/api-test` for testing and validation
 
 ## Deployment Strategy
 
