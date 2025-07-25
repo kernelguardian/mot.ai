@@ -82,12 +82,20 @@ The application follows a typical client-server data flow:
 
 ### DVSA API Integration
 - **Official DVSA MOT History API Integration**: Full implementation with OAuth2 authentication
-- **Automatic Fallback**: Uses realistic mock data when API credentials are not configured
+- **Real Data Only**: System only uses authentic DVSA data - no mock fallbacks
 - **Authentication**: Microsoft Entra ID OAuth2 with client credentials flow
 - **Token Caching**: Automatic token management with 50-minute cache duration
-- **Error Handling**: Comprehensive error handling with specific user-friendly messages
+- **Error Handling**: Returns 503 errors when DVSA API not configured, vehicle not found errors for invalid registrations
 - **Rate Limiting**: Built-in support for API rate limits and quotas
 - **API Test Console**: Developer interface at `/api-test` for testing and validation
+
+### AI Prediction System
+- **Dummy AI Service**: Simulates professional AI API for MOT failure predictions
+- **Pattern Analysis**: Analyzes real MOT history to identify failure patterns
+- **Risk Assessment**: Categorizes predictions as LOW/MEDIUM/HIGH risk with confidence scores
+- **Vehicle-Specific**: Considers vehicle age, fuel type, and previous failure history
+- **Category-Based**: Groups predictions by common failure areas (brakes, tyres, lights, etc.)
+- **Realistic Processing**: Simulates AI processing delays and professional analysis output
 
 ## Deployment Strategy
 
