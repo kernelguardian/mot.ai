@@ -1,5 +1,8 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool as PgPool } from 'pg';
+import { drizzle as pgDrizzle } from 'drizzle-orm/node-postgres';
+import ws from "ws";
 import * as schema from "@shared/schema";
 
 if (!process.env.DATABASE_URL) {
@@ -11,23 +14,18 @@ if (!process.env.DATABASE_URL) {
 // Check if we're using Neon (for cloud deployment) or local PostgreSQL
 const isNeonDatabase = process.env.DATABASE_URL.includes('neon.tech') || process.env.DATABASE_URL.includes('neondb.net');
 
-let pool: Pool;
+let pool: Pool | PgPool;
 let db: any;
 
 if (isNeonDatabase) {
   // Use Neon serverless for cloud deployment
-  const { Pool: NeonPool, neonConfig } = require('@neondatabase/serverless');
-  const ws = require('ws');
-  
   neonConfig.webSocketConstructor = ws;
-  pool = new NeonPool({ connectionString: process.env.DATABASE_URL });
-  
-  const { drizzle: neonDrizzle } = require('drizzle-orm/neon-serverless');
-  db = neonDrizzle({ client: pool, schema });
-} else {
-  // Use regular PostgreSQL for local development
   pool = new Pool({ connectionString: process.env.DATABASE_URL });
   db = drizzle({ client: pool, schema });
+} else {
+  // Use regular PostgreSQL for local development
+  pool = new PgPool({ connectionString: process.env.DATABASE_URL });
+  db = pgDrizzle({ client: pool, schema });
 }
 
 export { pool, db };

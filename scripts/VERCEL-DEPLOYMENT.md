@@ -18,9 +18,11 @@
 ### 2. Configure Build Settings
 Vercel should automatically detect the configuration from `vercel.json`, but verify:
 - **Framework Preset**: Other
-- **Build Command**: `npm run build`
+- **Build Command**: `npm install && npm run build`
 - **Output Directory**: `dist/public`
 - **Install Command**: `npm ci`
+
+**Important**: The project now uses a simplified Vercel configuration that automatically handles both frontend and backend deployment.
 
 ### 3. Set Environment Variables
 In your Vercel project dashboard, go to Settings → Environment Variables and add:
@@ -101,16 +103,29 @@ After first deployment, you need to set up the database tables:
 - Check build logs in Vercel dashboard
 - Ensure all dependencies are in `package.json`
 - Verify TypeScript compilation passes locally
+- Make sure `npm run build` works locally first
+
+### API Route Issues  
+- Verify `/api/*` routes are working by testing `/api-test`
+- Check that the `api/index.js` serverless function is correctly importing the Express app
+- Ensure the built `dist/index.js` file exports the app properly
 
 ### Database Connection Issues
 - Verify `DATABASE_URL` format is correct
 - Check database server allows external connections
 - Test connection locally first
+- For Neon: Ensure WebSocket connections are allowed
 
 ### DVSA API Issues
 - Verify all four DVSA credentials are correct
-- Check API credentials haven't expired
+- Check API credentials haven't expired  
 - Test with `/api-test` endpoint
+- Verify OAuth2 token URL includes correct tenant ID
+
+### Module Import Errors
+- If you see "Cannot find module" errors, ensure all imports use `.js` extensions in the built code
+- Check that the build process completed successfully
+- Verify all dependencies are listed in `package.json`
 
 ### Performance Optimization
 - Database queries are optimized for Vercel's serverless functions
