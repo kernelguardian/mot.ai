@@ -147,35 +147,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let vehicle = await storage.getVehicleByRegistration(registration);
       
       if (!vehicle) {
-        // Simulate DVSA API call
-        const dvsaData = mockDVSAResponse(registration);
+        // Fetch data from DVSA API (falls back to mock if not configured)
+        let dvsaData;
+        try {
+          if (isDVSAConfigured()) {
+            console.log("Using official DVSA API for registration:", registration);
+            dvsaData = await fetchDVSAMotData(registration);
+          } else {
+            console.log("DVSA API not configured, using mock data for registration:", registration);
+            dvsaData = mockDVSAResponse(registration);
+          }
+        } catch (error) {
+          console.error("DVSA API error, falling back to mock data:", error);
+          dvsaData = mockDVSAResponse(registration);
+        }
         
-        // Create vehicle record
+        // Create vehicle record (handle both real DVSA and mock data formats)
+        const firstUsedYear = dvsaData.firstUsedDate ? 
+          parseInt(dvsaData.firstUsedDate.split(/[-.]/, 1)[0]) : 
+          new Date().getFullYear();
+        
+        const vehicleData: any = dvsaData; // Type assertion to handle mixed formats
+        
         vehicle = await storage.createVehicle({
-          registration: dvsaData.registration,
-          make: dvsaData.make,
-          model: dvsaData.model,
-          year: parseInt(dvsaData.firstUsedDate.split('.')[0]),
-          fuelType: dvsaData.fuelType,
-          engineSize: dvsaData.engineSize,
-          colour: dvsaData.colour,
-          motStatus: dvsaData.motTests[0]?.testResult || "UNKNOWN",
-          motExpiryDate: dvsaData.motTests[0]?.expiryDate || null,
+          registration: vehicleData.registration,
+          make: vehicleData.make,
+          model: vehicleData.model,
+          year: firstUsedYear,
+          fuelType: vehicleData.fuelType,
+          engineSize: vehicleData.engineSize,
+          colour: vehicleData.primaryColour || vehicleData.colour, // Real API uses primaryColour
+          motStatus: vehicleData.motTests[0]?.testResult || "UNKNOWN",
+          motExpiryDate: vehicleData.motTests[0]?.expiryDate || null,
         });
 
-        // Store MOT test history
-        for (const test of dvsaData.motTests) {
+        // Store MOT test history (handle both real DVSA and mock data formats)
+        for (const test of vehicleData.motTests) {
+          const testData: any = test; // Type assertion for mixed formats
+          const odometerValue = testData.odometerValue ? parseInt(testData.odometerValue.toString()) : null;
+          const testCentre = testData.testCentre?.name || "Unknown Test Centre";
+          
+          // Handle different defect formats (real DVSA API uses 'defects', mock uses 'defects' or 'rfrAndComments')
+          const defects = testData.defects || testData.rfrAndComments || [];
+          
           await storage.createMotTest({
             vehicleId: vehicle.id,
-            testDate: test.completedDate,
-            testResult: test.testResult,
-            expiryDate: test.expiryDate,
-            odometerValue: parseInt(test.odometerValue),
-            odometerUnit: test.odometerUnit,
-            testNumber: test.motTestNumber,
-            testCentre: test.testCentre.name,
-            failures: test.defects?.filter(d => d.type === "FAIL") || [],
-            advisories: test.defects?.filter(d => d.type === "ADVISORY") || [],
+            testDate: testData.completedDate,
+            testResult: testData.testResult,
+            expiryDate: testData.expiryDate,
+            odometerValue: odometerValue,
+            odometerUnit: testData.odometerUnit,
+            testNumber: testData.motTestNumber,
+            testCentre: testCentre,
+            failures: defects.filter((d: any) => d.type === "FAIL" || d.type === "MAJOR") || [],
+            advisories: defects.filter((d: any) => d.type === "ADVISORY") || [],
           });
         }
 
