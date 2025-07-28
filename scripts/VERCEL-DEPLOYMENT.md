@@ -22,9 +22,10 @@ Vercel will automatically detect the configuration from `vercel.json`:
 - **Output Directory**: `dist/public` (from vercel.json)
 - **Install Command**: `npm ci` (auto-detected)
 
-**Important**: The project uses a simplified Vercel configuration:
+**Important**: The project uses Vercel configuration with proper API routing:
 - Frontend assets are served from `dist/public`
-- API routes are handled by the `api/index.js` serverless function
+- API routes (`/api/*`) are handled by the `api/[...path].js` serverless function
+- All API requests are routed to the Express app
 - The Express app is automatically initialized for each request
 
 ### 3. Set Environment Variables
@@ -108,10 +109,13 @@ After first deployment, you need to set up the database tables:
 - Verify TypeScript compilation passes locally
 - Make sure `npm run build` works locally first
 
-### API Route Issues  
-- Verify `/api/*` routes are working by testing `/api-test`
-- Check that the `api/index.js` serverless function is correctly importing the Express app
-- Ensure the built `dist/index.js` file exports the app properly
+### API Route Issues (404 Errors)
+- **Most Common**: API routes returning 404 means Vercel isn't routing `/api/*` to the serverless function
+- Verify the `api/[...path].js` file exists and is properly configured
+- Check that `vercel.json` has the correct routes configuration
+- Test `/api-test` endpoint first to verify API routing
+- Ensure the built `dist/index.js` file exports `initializeApp` function properly
+- Check Vercel function logs for import/export errors
 
 ### Database Connection Issues
 - Verify `DATABASE_URL` format is correct
