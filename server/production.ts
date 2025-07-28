@@ -1,11 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -29,14 +29,14 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      console.log(`${new Date().toLocaleTimeString()} [express] ${logLine}`);
     }
   });
 
   next();
 });
 
-async function createApp() {
+async function createProductionApp() {
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -44,20 +44,8 @@ async function createApp() {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    console.error('Production app error:', err);
   });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    // Only serve static files if not in Vercel (Vercel handles static files)
-    if (!process.env.VERCEL) {
-      serveStatic(app);
-    }
-  }
 
   return { app, server };
 }
@@ -67,31 +55,10 @@ let appInstance: any = null;
 
 async function initializeApp() {
   if (!appInstance) {
-    const { app } = await createApp();
+    const { app } = await createProductionApp();
     appInstance = app;
   }
   return appInstance;
 }
 
-// Start the server for local development
-(async () => {
-  const { server } = await createApp();
-  
-  if (!process.env.VERCEL) {
-    // ALWAYS serve the app on the port specified in the environment variable PORT
-    // Other ports are firewalled. Default to 5000 if not specified.
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = parseInt(process.env.PORT || '5000', 10);
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
-  }
-})();
-
-// Export for Vercel
 export { initializeApp };

@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
   "outputDirectory": "dist/public",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/api/[...path].js"
     },
     {
       "src": "/(.*)",

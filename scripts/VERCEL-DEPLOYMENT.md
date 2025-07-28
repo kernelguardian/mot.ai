@@ -109,13 +109,19 @@ After first deployment, you need to set up the database tables:
 - Verify TypeScript compilation passes locally
 - Make sure `npm run build` works locally first
 
-### API Route Issues (404 Errors)
+### API Route Issues (404 Errors & Rollup Errors)
 - **Most Common**: API routes returning 404 means Vercel isn't routing `/api/*` to the serverless function
-- Verify the `api/[...path].js` file exists and is properly configured
-- Check that `vercel.json` has the correct routes configuration
+- **Rollup/Vite Import Errors**: The production build now uses `server/production.ts` to avoid Vite dependencies
+- Verify the `api/[...path].js` file exists and imports from `../dist/production.js`
+- Check that `vercel.json` has the correct routes configuration pointing to `/api/[...path].js`
 - Test `/api-test` endpoint first to verify API routing
-- Ensure the built `dist/index.js` file exports `initializeApp` function properly
+- Ensure the built `dist/production.js` file exports `initializeApp` function properly
 - Check Vercel function logs for import/export errors
+
+### Dependency Issues (Cannot find module errors)
+- **Rollup/Build Tool Errors**: Production serverless function uses dedicated build without Vite dependencies
+- **Missing Dependencies**: Ensure all required packages are in `dependencies` not `devDependencies`
+- Check that the build command completes successfully: `npm run build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist`
 
 ### Database Connection Issues
 - Verify `DATABASE_URL` format is correct

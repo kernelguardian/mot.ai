@@ -1,5 +1,5 @@
 // Vercel API route handler - catch all API paths
-import { initializeApp } from '../dist/index.js';
+import { initializeApp } from '../dist/production.js';
 
 let app = null;
 
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
     console.error('Vercel API handler error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
-      message: error.message 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
